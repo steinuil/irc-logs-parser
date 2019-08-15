@@ -32,7 +32,7 @@ class SlowTextualLineParser
 end
 
 class TextualLineParser
-  def parse_line msg
+  def parse_line _day, msg
     d = msg.match /\[(.+?)\]/
     return unless d
 
@@ -49,6 +49,17 @@ class TextualLineParser
     else
       Message.new date, m[1], m[2].strip
     end
+  end
+end
+
+class TryBothTextualLineParsers
+  def initialize
+    @parser = TextualLineParser.new
+    @slow_parser = SlowTextualLineParser.new
+  end
+
+  def parse_line day, msg
+    @parser.parse_line(day, msg) || @slow_parser.parse_line(day, msg)
   end
 end
 
@@ -73,14 +84,9 @@ class OldHexchatLineParser
 end
 
 class TextualParser
-  def initialize line_parser, slow_line_parser, server_map
+  def initialize line_parser, server_map
     @line_parser = line_parser
-    @slow_line_parser = slow_line_parser
     @server_map = server_map
-  end
-
-  def parse_line day, msg
-    @line_parser.parse_line(msg) || @slow_line_parser.parse_line(day, msg)
   end
 
   def parse base
@@ -88,10 +94,12 @@ class TextualParser
       dir_a(File.join(path, 'Channels')).each do |channel|
         raise channel unless channel.start_with? '#'
 
-        days(File.join(path, 'Channels', channel)) do |day, msg|
-          #msg = @line_parser.parse_line(msg) || @slow_line_parser.parse_line(day, msg)
-          msg = parse_line day, msg
-          next unless msg
+        days(File.join(path, 'Channels', channel)) do |day, line|
+          msg = @line_parser.parse_line day, line
+          unless msg
+            STDERR.puts "#{day}: #{line}"
+            next
+          end
           msg.server = server
           msg.channel = channel
           yield msg
@@ -99,20 +107,24 @@ class TextualParser
       end
 
       dir_a(File.join(path, 'Queries')).each do |nick|
-        days(File.join(path, 'Queries', nick)) do |day, msg|
-          #msg = @line_parser.parse_line day, msg
-          msg = parse_line day, msg
-          next unless msg
+        days(File.join(path, 'Queries', nick)) do |day, line|
+          msg = @line_parser.parse_line day, line
+          unless msg
+            STDERR.puts "#{day}: #{line}"
+            next
+          end
           msg.server = server
           msg.channel = nick
           yield msg
         end
       end
 
-      days(File.join(path, 'Console')) do |day, msg|
-        #msg = @line_parser.parse_line day, msg
-        msg = parse_line day, msg
-        next unless msg
+      days(File.join(path, 'Console')) do |day, line|
+        msg = @line_parser.parse_line day, line
+        unless msg
+          STDERR.puts "#{day}: #{line}"
+          next
+        end
         msg.server = server
         yield msg
       end

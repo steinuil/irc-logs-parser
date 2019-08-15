@@ -23,16 +23,17 @@ class Old2Parser
   end
 
   def parse base
-    servers(base) do |server, path|
+    servers(base) do |server, path, server_dir_name|
       dir_a(path).each do |channel|
         if File.directory?(File.join path, channel)
-          next if channel == 'server'
-
-          days(File.join(path, channel)) do |day, msg|
-            msg = @line_parser.parse_line day, msg
-            next unless msg
+          days(File.join(path, channel)) do |day, line|
+            msg = @line_parser.parse_line day, line
+            unless msg
+              STDERR.puts "#{day}: #{line}"
+              next
+            end
             msg.server = server
-            msg.channel = channel unless channel == server
+            msg.channel = channel unless channel == server_dir_name or channel == 'server'
             yield msg
           end
         elsif channel.end_with? '.txt'
@@ -44,7 +45,10 @@ class Old2Parser
           File.open(File.join(path, channel), 'r') do |f|
             f.each_line do |line|
               msg = @dotlog_parser.parse_line '2015', line
-              next unless msg
+              unless msg
+                STDERR.puts "#{channel}: #{line}"
+                next
+              end
               msg.server = server
               msg.channel = name
               yield msg
@@ -67,7 +71,7 @@ class Old2Parser
         next
       end
 
-      yield server, File.join(base, dir)
+      yield server, File.join(base, dir), dir
     end
   end
 
