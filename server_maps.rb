@@ -37,4 +37,9 @@ module ServerMaps
     'Ustream (65976)' => Networks::USTREAM,
     'Ustream (95872)' => Networks::USTREAM,
   }
+
+  LIMECHAT = {
+    'Freenode' => Networks::FREENODE,
+    'irc.rizon.net' => Networks::RIZON,
+  }
 end

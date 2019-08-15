@@ -4,6 +4,7 @@ require_relative 'server_maps'
 
 require_relative 'parser_textual'
 require_relative 'parser_wut'
+require_relative 'parser_limechat'
 
 require 'csv'
 
@@ -28,6 +29,11 @@ CSV.open(out, 'w') do |csv|
 
   parser = TextualParser.new TextualLineParser.new, ServerMaps::OLD_MAC
   parser.parse('../ircdev/2015.09.10-2016.01.24/') do |msg|
+    csv << msg.to_csv
+  end
+
+  parser = LimeChatParser.new LimeChatLineParser.new, ServerMaps::LIMECHAT
+  parser.parse('../ircdev/2016.09.05-2016.11.30/') do |msg|
     csv << msg.to_csv
   end
 end
