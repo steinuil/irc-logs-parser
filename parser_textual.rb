@@ -1,30 +1,20 @@
 require_relative 'message'
 
-class OldMacLineParser
+class SlowTextualLineParser
   def parse_time day, msg
     m = msg.match(/\[(.+?)\]/)
-    if m.nil?
-      #STDERR.puts "invalid msg @ #{day}: #{msg}"
-      return
-    end
+    return if m.nil?
     t = m[1]
 
     d = "#{day} #{t} CET"
     date =
       strptime(d, '%Y-%m-%d %H.%M %Z') ||
       strptime(d, '%Y-%m-%d %H:%M %Z') ||
-      strptime(d, '%Y-%m-%d %H:%M:%S %Z') ||
-      strptime(t, '%Y-%m-%dT%H:%M:%S%z')
+      strptime(d, '%Y-%m-%d %H:%M:%S %Z')
 
-    if date.nil?
-      #STDERR.puts "invalid date: #{d}"
-      return
-    end
+    return if date.nil?
 
     [date.to_time, msg[(t.length + 3)..-1]]
-  rescue => e
-    STDERR.puts day, msg
-    raise e
   end
 
   def parse_line day, msg
@@ -41,12 +31,57 @@ class OldMacLineParser
   end
 end
 
+class TextualLineParser
+  def parse_line msg
+    d = msg.match /\[(.+?)\]/
+    return unless d
+
+    date = strptime(d[1], '%Y-%m-%dT%H:%M:%S%z')
+    return unless date
+    date = date.to_time
+
+    rest = msg[(d[0].length + 1)..-1]
+
+    m = rest.match /^<(.+?)>(.*)$/
+
+    if m.nil?
+      Message.new date, nil, rest.strip
+    else
+      Message.new date, m[1], m[2].strip
+    end
+  end
+end
+
+class OldHexchatLineParser
+  def parse_line day, msg
+    d = msg.match(/\[(.+?)\]/)
+    return unless d
+
+    date = strptime "#{day} #{d[1]} CET", '%Y-%m-%d %H:%M:%S %Z'
+    return unless date
+    date = date.to_time
+
+    rest = msg[(d[0].length + 1)..-1]
+    m = rest.match /^<(.+?)>(.*)$/
+
+    if m.nil?
+      Message.new date, nil, rest.strip
+    else
+      Message.new date, m[1], m[2].strip
+    end
+  end
+end
+
 class TextualParser
-  def initialize line_parser, server_map
+  def initialize line_parser, slow_line_parser, server_map
     @line_parser = line_parser
+    @slow_line_parser = slow_line_parser
     @server_map = server_map
   end
 
+  def parse_line day, msg
+    @line_parser.parse_line(msg) || @slow_line_parser.parse_line(day, msg)
+  end
 
   def parse base
     servers(base) do |server, path|
@@ -54,7 +89,8 @@ class TextualParser
         raise channel unless channel.start_with? '#'
 
         days(File.join(path, 'Channels', channel)) do |day, msg|
-          msg = @line_parser.parse_line day, msg
+          #msg = @line_parser.parse_line(msg) || @slow_line_parser.parse_line(day, msg)
+          msg = parse_line day, msg
           next unless msg
           msg.server = server
           msg.channel = channel
@@ -64,7 +100,8 @@ class TextualParser
 
       dir_a(File.join(path, 'Queries')).each do |nick|
         days(File.join(path, 'Queries', nick)) do |day, msg|
-          msg = @line_parser.parse_line day, msg
+          #msg = @line_parser.parse_line day, msg
+          msg = parse_line day, msg
           next unless msg
           msg.server = server
           msg.channel = nick
@@ -73,7 +110,8 @@ class TextualParser
       end
 
       days(File.join(path, 'Console')) do |day, msg|
-        msg = @line_parser.parse_line day, msg
+        #msg = @line_parser.parse_line day, msg
+        msg = parse_line day, msg
         next unless msg
         msg.server = server
         yield msg
