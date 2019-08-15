@@ -30,4 +30,5 @@ module Networks
   TWITCH = 'irc.twitch.tv'
   UNDERNET = 'irc.undernet.org'
   USTREAM = 'chat1.ustream.tv'
+  SUSHIGIRL = 'irc.sushigirl.tokyo'
 end

@@ -16,18 +16,11 @@ class DotLogLineParser
 end
 
 class Old2Parser
-  def initialize line_parser, dotlog_parser
+  def initialize line_parser, dotlog_parser, server_map
     @line_parser = line_parser
     @dotlog_parser = dotlog_parser
+    @server_map = server_map
   end
-
-  SERVERS = {
-    'AnimeBytes' => Networks::ANIMEBYTES,
-    'IRCHighWay' => Networks::IRCHIGHWAY,
-    'Rizon' => Networks::RIZON,
-    'Twitch' => Networks::TWITCH,
-    'ustream' => Networks::USTREAM
-  }
 
   def parse base
     servers(base) do |server, path|
@@ -68,7 +61,7 @@ class Old2Parser
 
   def servers base
     dir_a(base).each do |dir|
-      server = SERVERS[dir]
+      server = @server_map[dir]
       unless server
         STDERR.puts "invalid server: #{dir}"
         next

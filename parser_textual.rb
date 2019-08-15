@@ -41,28 +41,12 @@ class OldMacLineParser
   end
 end
 
-class OldMacParser
-  def initialize line_parser
+class TextualParser
+  def initialize line_parser, server_map
     @line_parser = line_parser
+    @server_map = server_map
   end
 
-  SERVERS = {
-    '_g_' => Networks::INSTALLGENTOO,
-    'animebytes' => Networks::ANIMEBYTES,
-    'Animebytes (EA118)' => Networks::ANIMEBYTES,
-    'chat.freenode.net' => Networks::FREENODE,
-    'Esper (B523A)' => Networks::ESPER,
-    'freenode (4F6A2)' => Networks::FREENODE,
-    'IRCHighway' => Networks::IRCHIGHWAY,
-    'IRCHW (AC5CE)' => Networks::IRCHIGHWAY,
-    'QuakeNet' => Networks::QUAKENET,
-    'Rizon' => Networks::RIZON,
-    'Rizon (FB91E)' => Networks::RIZON,
-    'Twitch' => Networks::TWITCH,
-    'Undernet (4DE50)' => Networks::UNDERNET,
-    'Ustream (2016C)' => Networks::USTREAM,
-    'What-Network.Net' => Networks::WHAT_NETWORK
-  }
 
   def parse base
     servers(base) do |server, path|
@@ -101,7 +85,7 @@ class OldMacParser
 
   def servers base
     dir_a(base).each do |dir|
-      server = SERVERS[dir]
+      server = @server_map[dir]
       next unless server
       yield server, File.join(base, dir)
     end
