@@ -1,21 +1,5 @@
 require_relative 'message'
 
-class LimeChatLineParser
-  def parse_line day, msg
-    date = strptime "#{day} #{msg[0..4]} CET", '%Y-%m-%d %H:%M %Z'
-    return unless date
-    date = date.to_time
-
-    rest = msg[6..-1]
-    m = rest.match /^([^\s]+?): (.*)$/
-    if m.nil?
-      Message.new date, nil, rest.strip
-    else
-      Message.new date, m[1], m[2].strip
-    end
-  end
-end
-
 class LimeChatParser
   def initialize line_parser, server_map
     @line_parser = line_parser

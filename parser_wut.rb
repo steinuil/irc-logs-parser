@@ -1,21 +1,5 @@
 require_relative 'message'
 
-class DotLogLineParser
-  def parse_line year, msg
-    date = strptime "#{year} #{msg[0..14]} CET", '%Y %b %d %H:%M:%S %Z'
-    return unless date
-    date = date.to_time
-
-    rest = msg[16..-1]
-    m = rest.match /^<(.+?)>(.*)$/
-    if m.nil?
-      Message.new date, nil, rest.strip
-    else
-      Message.new date, m[1], m[2].strip
-    end
-  end
-end
-
 class Old2Parser
   def initialize line_parser, dotlog_parser, server_map
     @line_parser = line_parser
