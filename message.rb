@@ -1,6 +1,14 @@
 require 'date'
 
-Message = Struct.new :time, :nick, :message, :channel, :server
+class Message < Struct.new :time, :nick, :message, :channel, :server
+  def self.csv_header
+    ['server', 'channel', 'time', 'nick', 'message']
+  end
+
+  def to_csv
+    [server, channel, time, nick, message]
+  end
+end
 
 def dir_a dir
   Dir.entries(dir).-(['.', '..']) rescue []

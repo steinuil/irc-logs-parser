@@ -3,7 +3,10 @@ require_relative 'message'
 class OldMacLineParser
   def parse_time day, msg
     m = msg.match(/\[(.+?)\]/)
-    return if m.nil?
+    if m.nil?
+      #STDERR.puts "invalid msg @ #{day}: #{msg}"
+      return
+    end
     t = m[1]
 
     d = "#{day} #{t} CET"
@@ -12,6 +15,12 @@ class OldMacLineParser
       strptime(d, '%Y-%m-%d %H:%M %Z') ||
       strptime(d, '%Y-%m-%d %H:%M:%S %Z') ||
       strptime(t, '%Y-%m-%dT%H:%M:%S%z')
+
+    if date.nil?
+      #STDERR.puts "invalid date: #{d}"
+      return
+    end
+
     [date.to_time, msg[(t.length + 3)..-1]]
   rescue => e
     STDERR.puts day, msg
