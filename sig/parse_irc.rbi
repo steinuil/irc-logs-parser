@@ -75,6 +75,9 @@ end
 class HexchatDotLogLineParser < BaseLineParser
 end
 
+class HexchatNewLineParser < BaseLineParser
+end
+
 ## Log parsers
 
 interface _LogParser
@@ -118,4 +121,12 @@ class HexchatOldLogParser < BaseLogParser
   def directories_in: (String) { (String) -> any } -> void
   def files_in: (String) { (String) -> any } -> void
   def messages_in_dotlog: (String, String) { (Message) -> any } -> void
+end
+
+class HexchatNewLogParser < BaseLogParser
+  @line_parser: _LineParser
+  @server_map: server_map
+
+  def initialize: (_LineParser, server_map) -> any
+  def parse: (String) { (Message) -> any } -> any
 end

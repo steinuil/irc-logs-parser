@@ -125,3 +125,17 @@ class HexchatDotLogLineParser < BaseLineParser
     /^<(.+?)>(.*)$/
   end
 end
+
+class HexchatNewLineParser < BaseLineParser
+  def parse_time day, msg
+    date = strptime "#{day} #{msg[0..7]} CET", '%Y-%m-%d %H:%M:%S %Z'
+    return unless date
+
+    rest = msg[9..-1]
+    [date, rest]
+  end
+
+  def msg_regexp
+    /^<(.+?)>(.*)$/
+  end
+end

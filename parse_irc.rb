@@ -40,4 +40,9 @@ CSV.open(out, 'w') do |csv|
   parser.parse '../ircdev/2016.09.05-2016.11.30/' do |msg|
     csv << msg.to_csv
   end
+
+  parser = HexchatNewLogParser.new HexchatNewLineParser.new, ServerMaps::FREEBSD_HEXCHAT
+  parser.parse '../ircdev/2017.01.08-2017.11.12' do |msg|
+    csv << msg.to_csv
+  end
 end
