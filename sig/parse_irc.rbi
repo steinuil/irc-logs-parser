@@ -53,7 +53,8 @@ class BaseLineParser
 end
 
 class TryLineParsers
-  @parsers: Array<BaseLineParser>
+  @parsers: Array<_LineParser>
+  def initialize: (*_LineParser) -> any
   def parse_line: (String, String) -> Message?
 end
 
@@ -85,4 +86,17 @@ class TextualLogParser < BaseLogParser
 
   def initialize: (_LineParser, server_map) -> any
   def parse: (String) { (Message) -> any } -> any
+end
+
+class HexchatOldLogParser < BaseLogParser
+  @line_parser: _LineParser
+  @dotlog_parser: _LineParser
+  @server_map: server_map
+
+  def initialize: (_LineParser, _LineParser, server_map) -> any
+  def parse: (String) { (Message) -> any } -> any
+
+  def directories_in: (String) { (String) -> any } -> void
+  def files_in: (String) { (String) -> any } -> void
+  def messages_in_dotlog: (String, String) { (Message) -> any } -> void
 end

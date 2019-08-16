@@ -4,7 +4,6 @@ require_relative 'server_maps'
 
 require_relative 'line_parsers'
 require_relative 'log_parsers'
-require_relative 'parser_wut'
 
 require 'csv'
 
@@ -23,7 +22,7 @@ CSV.open(out, 'w') do |csv|
     csv << msg.to_csv
   end
 
-  parser = Old2Parser.new(
+  parser = HexchatOldLogParser.new(
     OldHexchatLineParser.new,
     HexchatDotLogLineParser.new,
     ServerMaps::OLD_WINDOWS

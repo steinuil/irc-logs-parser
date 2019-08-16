@@ -8,7 +8,7 @@ class BaseLogParser
         if msg
           yield msg
         else
-          STDERR.puts "#{time_info}: #{line}"
+          STDERR.puts "#{file}: #{line}"
           next
         end
       end
@@ -99,6 +99,71 @@ class TextualLogParser < BaseLogParser
       end
 
       # skip Console dir
+    end
+  end
+end
+
+class HexchatOldLogParser < BaseLogParser
+  def initialize line_parser, dotlog_parser, server_map
+    @line_parser = line_parser
+    @dotlog_parser = dotlog_parser
+    @server_map = server_map
+  end
+
+  def parse base
+    entries_in base do |server_dir|
+      next if server_dir == 'NETWORK'
+      server = @server_map[server_dir] || raise(server_dir)
+
+      directories_in File.join(base, server_dir) do |channel|
+        next if channel == 'server' || channel == server_dir
+        path = File.join base, server_dir, channel
+
+        entries_in path do |log_name|
+          day = log_name[0..-5]
+
+          messages_in File.join(path, log_name), day do |msg|
+            msg.server = server
+            msg.channel = channel
+            yield msg
+          end
+        end
+      end
+
+      files_in File.join(base, server_dir) do |log_name|
+        next unless log_name.end_with? '.log'
+        path = File.join base, server_dir, log_name
+        nick = log_name[0..-5]
+        next if nick == 'server' || nick == server_dir
+
+        messages_in_dotlog path, '2015' do |msg|
+          msg.server = server
+          msg.channel = nick
+          yield msg
+        end
+      end
+    end
+  end
+
+  def directories_in path
+    entries_in(path) { |entry| yield entry if File.directory? File.join(path, entry) }
+  end
+
+  def files_in path
+    entries_in(path) { |entry| yield entry unless File.directory? File.join(path, entry) }
+  end
+
+  def messages_in_dotlog file, year
+    File.open file, 'r' do |f|
+      f.each_line do |line|
+        msg = @dotlog_parser.parse_line year, line
+        if msg
+          yield msg
+        else
+          STDERR.puts "#{file}: #{line}"
+          next
+        end
+      end
     end
   end
 end

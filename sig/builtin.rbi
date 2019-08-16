@@ -663,6 +663,7 @@ class File < IO
   def self.chmod: (Integer, String) -> void
   def self.join: (*String) -> String
   def self.open: <'x> (String, String) { (File) -> 'x } -> 'x
+  def self.directory?: (String) -> bool
 end
 
 class Proc
