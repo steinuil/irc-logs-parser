@@ -4,7 +4,6 @@ require_relative 'server_maps'
 
 require_relative 'line_parsers'
 require_relative 'log_parsers'
-require_relative 'parser_textual'
 require_relative 'parser_wut'
 
 require 'csv'
@@ -16,7 +15,7 @@ CSV.open(out, 'w') do |csv|
 
   # @type var parser: _LogParser
 
-  parser = TextualParser.new(
+  parser = TextualLogParser.new(
     TryLineParsers.new(TextualLineParser.new, SlowTextualLineParser.new),
     ServerMaps::OLDER_MAC
   )
@@ -33,7 +32,7 @@ CSV.open(out, 'w') do |csv|
     csv << msg.to_csv
   end
 
-  parser = TextualParser.new TextualLineParser.new, ServerMaps::OLD_MAC
+  parser = TextualLogParser.new TextualLineParser.new, ServerMaps::OLD_MAC
   parser.parse('../ircdev/2015.09.10-2016.01.24/') do |msg|
     csv << msg.to_csv
   end

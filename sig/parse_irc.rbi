@@ -78,3 +78,11 @@ class LimechatLogParser < BaseLogParser
   def dm_log: (String) -> Array<String>
   def channel_log: (String, String) -> Array<String>
 end
+
+class TextualLogParser < BaseLogParser
+  @line_parser: _LineParser
+  @server_map: server_map
+
+  def initialize: (_LineParser, server_map) -> any
+  def parse: (String) { (Message) -> any } -> any
+end

@@ -8,7 +8,7 @@ class BaseLogParser
         if msg
           yield msg
         else
-          STDERR.puts "#{day}: #{line}"
+          STDERR.puts "#{time_info}: #{line}"
           next
         end
       end
@@ -57,5 +57,48 @@ class LimechatLogParser < BaseLogParser
     server_dir_name = m[2] || raise
 
     [channel, day, server_dir_name]
+  end
+end
+
+class TextualLogParser < BaseLogParser
+  def initialize line_parser, server_map
+    @line_parser = line_parser
+    @server_map = server_map
+  end
+
+  def parse base
+    entries_in base do |server_dir|
+      next if server_dir == 'temp'
+      server = @server_map[server_dir] || raise(server_dir)
+      path = File.join base, server_dir
+
+      entries_in File.join(path, 'Channels') do |channel|
+        entries_in File.join(path, 'Channels', channel) do |log_name|
+          next if log_name.match /copia/
+          day = log_name[0..-5]
+
+          messages_in File.join(path, 'Channels', channel, log_name), day do |msg|
+            msg.server = server
+            msg.channel = channel
+            yield msg
+          end
+        end
+      end
+
+      entries_in File.join(path, 'Queries') do |nick|
+        entries_in File.join(path, 'Queries', nick) do |log_name|
+          next if log_name.match /copia/
+          day = log_name[0..-5]
+
+          messages_in File.join(path, 'Queries', nick, log_name), day do |msg|
+            msg.server = server
+            msg.channel = nick
+            yield msg
+          end
+        end
+      end
+
+      # skip Console dir
+    end
   end
 end
