@@ -14,7 +14,7 @@ out = ARGV[0] || 'logs.csv'
 CSV.open(out, 'w') do |csv|
   csv << Message.csv_header
 
-
+  # @type var parser: _Parser
   parser = TextualParser.new(
     TryLineParsers.new(TextualLineParser.new, SlowTextualLineParser.new),
     ServerMaps::OLDER_MAC

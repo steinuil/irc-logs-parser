@@ -14,10 +14,6 @@ def dir_a dir
   Dir.entries(dir).-(['.', '..']) rescue []
 end
 
-def strptime date, fmt
-  DateTime.strptime(date, fmt) rescue nil
-end
-
 module Networks
   RIZON = 'irc.rizon.net'
   WHAT_NETWORK = 'irc.what-network.net'

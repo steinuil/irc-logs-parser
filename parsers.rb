@@ -1,6 +1,19 @@
+require 'date'
 require_relative 'message'
 
 class BaseLineParser
+  def strptime date, fmt
+    DateTime.strptime(date, fmt).to_time rescue nil
+  end
+
+  def parse_time time_info, msg
+    raise NotImplementedError
+  end
+
+  def msg_regexp
+    raise NotImplementedError
+  end
+
   def parse_msg rest
     m = rest.match msg_regexp
     m and m[1..2]
@@ -8,8 +21,6 @@ class BaseLineParser
 
   def parse_line time_info, msg
     date, rest = parse_time(time_info, msg) || return
-
-    date = date.to_time
 
     nick, text = parse_msg rest
     if nick
@@ -30,6 +41,7 @@ class TryLineParsers
       out = parser.parse_line(day, msg)
       return out if out
     end
+    nil
   end
 end
 
@@ -46,9 +58,8 @@ end
 
 class SlowTextualLineParser < BaseLineParser
   def parse_time day, msg
-    t = msg.match(/\[(.+?)\]/)
-    return unless t
-    t = t[1]
+    m = msg.match(/\[(.+?)\]/) || return
+    t = m[1] || return
 
     d = "#{day} #{t} CET"
     date =
@@ -68,13 +79,12 @@ end
 
 class TextualLineParser < BaseLineParser
   def parse_time _day, msg
-    d = msg.match /\[(.+?)\]/
-    return unless d
+    m = msg.match(/\[(.+?)\]/) || return
+    d = m[1] || return
 
-    date = strptime(d[1], '%Y-%m-%dT%H:%M:%S%z')
-    return unless date
+    date = strptime(d, '%Y-%m-%dT%H:%M:%S%z') || return
 
-    [date, msg[(d[0].length + 1)..-1]]
+    [date, msg[(d.length + 3)..-1]]
   end
 
   def msg_regexp
@@ -84,13 +94,13 @@ end
 
 class OldHexchatLineParser < BaseLineParser
   def parse_time day, msg
-    d = msg.match(/\[(.+?)\]/)
-    return unless d
+    m = msg.match(/\[(.+?)\]/) || return
+    d = m[1] || return
 
-    date = strptime "#{day} #{d[1]} CET", '%Y-%m-%d %H:%M:%S %Z'
+    date = strptime "#{day} #{d} CET", '%Y-%m-%d %H:%M:%S %Z'
     return unless date
 
-    rest = msg[(d[0].length + 1)..-1]
+    rest = msg[(d.length + 3)..-1]
     [date, rest]
   end
 

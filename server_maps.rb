@@ -42,4 +42,11 @@ module ServerMaps
     'Freenode' => Networks::FREENODE,
     'irc.rizon.net' => Networks::RIZON,
   }
+
+  FREEBSD_HEXCHAT = {
+    'freenode' => Networks::FREENODE,
+    'irchighway' => Networks::IRCHIGHWAY,
+    'rizon' => Networks::RIZON,
+    'ustream' => Networks::USTREAM,
+  }
 end
