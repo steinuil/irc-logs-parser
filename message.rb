@@ -11,7 +11,9 @@ class Message < Struct.new :time, :nick, :message, :channel, :server
 end
 
 def dir_a dir
-  Dir.entries(dir).-(['.', '..']) rescue []
+  Dir.entries(dir).-(['.', '..'])
+rescue
+  []
 end
 
 module Networks

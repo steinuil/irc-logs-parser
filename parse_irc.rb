@@ -2,10 +2,10 @@ require_relative 'message'
 
 require_relative 'server_maps'
 
-require_relative 'parsers'
+require_relative 'line_parsers'
+require_relative 'log_parsers'
 require_relative 'parser_textual'
 require_relative 'parser_wut'
-require_relative 'parser_limechat'
 
 require 'csv'
 
@@ -14,7 +14,8 @@ out = ARGV[0] || 'logs.csv'
 CSV.open(out, 'w') do |csv|
   csv << Message.csv_header
 
-  # @type var parser: _Parser
+  # @type var parser: _LogParser
+
   parser = TextualParser.new(
     TryLineParsers.new(TextualLineParser.new, SlowTextualLineParser.new),
     ServerMaps::OLDER_MAC
@@ -37,8 +38,8 @@ CSV.open(out, 'w') do |csv|
     csv << msg.to_csv
   end
 
-  parser = LimeChatParser.new LimeChatLineParser.new, ServerMaps::LIMECHAT
-  parser.parse('../ircdev/2016.09.05-2016.11.30/') do |msg|
+  parser = LimechatLogParser.new LimeChatLineParser.new, ServerMaps::LIMECHAT
+  parser.parse '../ircdev/2016.09.05-2016.11.30/' do |msg|
     csv << msg.to_csv
   end
 end

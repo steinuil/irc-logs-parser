@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+loop do
+  puts 'Watching...'
+  system 'inotifywait -q -e modify sig/*.rbi *.rb'
+  system 'make'
+end

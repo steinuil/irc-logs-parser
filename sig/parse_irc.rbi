@@ -11,11 +11,13 @@ Networks::UNDERNET: String
 Networks::USTREAM: String
 Networks::SUSHIGIRL: String
 
-ServerMaps::OLDER_MAC: Hash<String, String>
-ServerMaps::OLD_WINDOWS: Hash<String, String>
-ServerMaps::OLD_MAC: Hash<String, String>
-ServerMaps::LIMECHAT: Hash<String, String>
-ServerMaps::FREEBSD_HEXCHAT: Hash<String, String>
+type server_map = Hash<String, String>
+
+ServerMaps::OLDER_MAC: server_map
+ServerMaps::OLD_WINDOWS: server_map
+ServerMaps::OLD_MAC: server_map
+ServerMaps::LIMECHAT: server_map
+ServerMaps::FREEBSD_HEXCHAT: server_map
 
 class Message
   @server: String
@@ -27,10 +29,19 @@ class Message
   def initialize: (Time, String?, String) -> any
 
   def server: -> String
+  def server=: (String) -> void
   def channel: -> String?
+  def channel=: (String) -> void
   def time: -> Time
   def nick: -> String?
   def message: -> String
+
+  def self.csv_header: -> Array<csv_value>
+  def to_csv: -> Array<csv_value>
+end
+
+interface _LineParser
+  def parse_line: (String, String) -> Message?
 end
 
 class BaseLineParser
@@ -46,7 +57,24 @@ class TryLineParsers
   def parse_line: (String, String) -> Message?
 end
 
-interface _Parser
+interface _LogParser
   def parse: (String) { (Message) -> any } -> any
 end
 
+class BaseLogParser
+  @line_parser: _LineParser
+
+  def messages_in: (String, any) { (Message) -> any } -> void
+  def entries_in: (String) { (String) -> any } -> void
+end
+
+class LimechatLogParser < BaseLogParser
+  @line_parser: _LineParser
+  @server_map: server_map
+
+  def initialize: (_LineParser, server_map) -> any
+  def parse: (String) { (Message) -> any } -> any
+
+  def dm_log: (String) -> Array<String>
+  def channel_log: (String, String) -> Array<String>
+end
