@@ -14,7 +14,6 @@ CSV.open(out, 'w') do |csv|
 
   # @type var parser: _LogParser
 
-=begin
   parser = TextualLogParser.new(
     TryLineParsers.new(TextualLineParser.new, TextualSlowLineParser.new),
     ServerMaps::OLDER_MAC
@@ -46,7 +45,6 @@ CSV.open(out, 'w') do |csv|
   parser.parse '../ircdev/2017.01.08-2017.11.12' do |msg|
     csv << msg.to_csv
   end
-=end
 
   parser = HexchatThinkpadLogParser.new HexchatDotLogLineParser.new, ServerMaps::HEXCHAT
   parser.parse '../ircdev/2017.11.14-2019.03.26-thinkpad' do |msg|
