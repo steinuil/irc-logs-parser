@@ -17,7 +17,7 @@ ServerMaps::OLDER_MAC: server_map
 ServerMaps::OLD_WINDOWS: server_map
 ServerMaps::OLD_MAC: server_map
 ServerMaps::LIMECHAT: server_map
-ServerMaps::FREEBSD_HEXCHAT: server_map
+ServerMaps::HEXCHAT: server_map
 
 class Message
   @server: String
@@ -124,6 +124,14 @@ class HexchatOldLogParser < BaseLogParser
 end
 
 class HexchatNewLogParser < BaseLogParser
+  @line_parser: _LineParser
+  @server_map: server_map
+
+  def initialize: (_LineParser, server_map) -> any
+  def parse: (String) { (Message) -> any } -> any
+end
+
+class HexchatThinkpadLogParser < BaseLogParser
   @line_parser: _LineParser
   @server_map: server_map
 

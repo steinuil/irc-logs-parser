@@ -182,11 +182,42 @@ class HexchatNewLogParser < BaseLogParser
       entries_in File.join(base, server_dir) do |channel|
         next if channel == 'server' || channel == server_dir
         path = File.join base, server_dir, channel
+        next unless File.directory? path
 
         entries_in path do |log_name|
           day = log_name[0..-5]
 
           messages_in File.join(path, log_name), day do |msg|
+            msg.server = server
+            msg.channel = channel
+            yield msg
+          end
+        end
+      end
+    end
+  end
+end
+
+class HexchatThinkpadLogParser < BaseLogParser
+  def initialize line_parser, server_map
+    @line_parser = line_parser
+    @server_map = server_map
+  end
+
+  def parse base
+    entries_in base do |server_dir|
+      next if server_dir == 'NETWORK'
+      server = @server_map[server_dir] || raise(server_dir)
+
+      entries_in File.join(base, server_dir) do |channel|
+        next if channel == 'server' || channel == server_dir
+        path = File.join base, server_dir, channel
+        next unless File.directory? path
+
+        entries_in path do |log_name|
+          year = log_name[0..3]
+
+          messages_in File.join(path, log_name), year do |msg|
             msg.server = server
             msg.channel = channel
             yield msg

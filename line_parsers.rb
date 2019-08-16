@@ -121,8 +121,10 @@ class HexchatDotLogLineParser < BaseLineParser
     [date, rest]
   end
 
-  def msg_regexp
-    /^<(.+?)>(.*)$/
+  def parse_msg rest
+    m = rest.match(/^(<.+?>|\([a-zA-Z0-9_\.`]+\))(.*)$/) || return
+    return unless m[1] and m[2]
+    [m[1][1..-2], m[2]]
   end
 end
 
