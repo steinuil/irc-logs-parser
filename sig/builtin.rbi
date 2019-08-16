@@ -395,6 +395,7 @@ class String
           | (Integer) -> Integer
   def end_with?: (*String) -> bool
   def match: (Regexp) -> MatchData?
+  def strip: -> String
 end
 
 interface _Iteratable<'a, 'b>
@@ -666,6 +667,10 @@ class File < IO
   def self.directory?: (String) -> bool
 end
 
+class Dir
+  def self.entries: (String) -> Array<String>
+end
+
 class Proc
   def []: (*any) -> any
   def call: (*any) -> any
@@ -792,4 +797,10 @@ class Set<'a>
 end
 
 class Time
+end
+
+STDERR: IO
+ARGV: Array<String>
+
+class NotImplementedError
 end

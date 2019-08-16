@@ -20,10 +20,13 @@ class BaseLineParser
   end
 
   def parse_line time_info, msg
-    date, rest = parse_time(time_info, msg) || return
+    d = parse_time(time_info, msg) || return
+    # have to do this not to get FallbackAny in steep
+    date, rest = d[0], d[1]
 
-    nick, text = parse_msg rest
-    if nick
+    m = parse_msg rest
+    if m
+      nick, text = m[0], m[1]
       Message.new date, nick, text.strip
     else
       Message.new date, nil, rest.strip
@@ -45,7 +48,7 @@ class TryLineParsers
   end
 end
 
-class LimeChatLineParser < BaseLineParser
+class LimechatLineParser < BaseLineParser
   def parse_time day, msg
     date = strptime("#{day} #{msg[0..4]} CET", '%Y-%m-%d %H:%M %Z') || return
     [date, msg[6..-1]]
@@ -56,7 +59,7 @@ class LimeChatLineParser < BaseLineParser
   end
 end
 
-class SlowTextualLineParser < BaseLineParser
+class TextualSlowLineParser < BaseLineParser
   def parse_time day, msg
     m = msg.match(/\[(.+?)\]/) || return
     t = m[1] || return
@@ -92,7 +95,7 @@ class TextualLineParser < BaseLineParser
   end
 end
 
-class OldHexchatLineParser < BaseLineParser
+class HexchatOldLineParser < BaseLineParser
   def parse_time day, msg
     m = msg.match(/\[(.+?)\]/) || return
     d = m[1] || return

@@ -10,12 +10,6 @@ class Message < Struct.new :time, :nick, :message, :channel, :server
   end
 end
 
-def dir_a dir
-  Dir.entries(dir).-(['.', '..'])
-rescue
-  []
-end
-
 module Networks
   RIZON = 'irc.rizon.net'
   WHAT_NETWORK = 'irc.what-network.net'

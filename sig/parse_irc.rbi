@@ -40,6 +40,8 @@ class Message
   def to_csv: -> Array<csv_value>
 end
 
+## Line parsers
+
 interface _LineParser
   def parse_line: (String, String) -> Message?
 end
@@ -57,6 +59,23 @@ class TryLineParsers
   def initialize: (*_LineParser) -> any
   def parse_line: (String, String) -> Message?
 end
+
+class LimechatLineParser < BaseLineParser
+end
+
+class TextualSlowLineParser < BaseLineParser
+end
+
+class TextualLineParser < BaseLineParser
+end
+
+class HexchatOldLineParser < BaseLineParser
+end
+
+class HexchatDotLogLineParser < BaseLineParser
+end
+
+## Log parsers
 
 interface _LogParser
   def parse: (String) { (Message) -> any } -> any
